@@ -2,9 +2,18 @@
 # Author: Megan McClarty
 
 """
-Logistic Regression Project 
+Logistic Regression Project
 
-In this project we will be working with a fake advertising data set, indicating whether or not a particular internet user clicked on an Advertisement. We will try to create a model that will predict whether or not they will click on an ad based off the features of that user.
+The following code comprises a brief project which analyzes a dataset called "Advertising", runs a logistic
+regression model to categorize users into whether they Clicked on an ad or not.  
+This project is part of the Udemy Course "Python for Data Science and Machine
+Learning". 
+
+### This version has been generalized for different data sets ###
+
+In this project we will be working with a fake advertising data set, indicating whether or not a particular internet 
+user clicked on an Advertisement. We will try to create a model that will predict whether or not they will click on 
+an ad based off the features of that user.
 
 This data set contains the following features:
 
@@ -26,6 +35,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
 
 
 def get_df(data_file):
@@ -35,9 +47,6 @@ def get_df(data_file):
     :param data_file: Local path to csv data file
     :return: 
     '''
-
-    # ## Get the Data
-    # **Read in the advertising.csv file and set it to a data frame called ad_data.**
 
     ad_data = pd.read_csv(data_file)
 
@@ -59,23 +68,15 @@ def visualize_data(ad_data, target, features):
     :return: 
     '''
 
-    sns.distplot(ad_data['Age'])
+    sns.distplot(ad_data[features[1]])
 
-    # **Create a jointplot showing Area Income versus Age.**
+    sns.jointplot(ad_data[features[1]], ad_data[features[2]])
 
-    sns.jointplot(ad_data['Age'], ad_data['Area Income'])
+    sns.jointplot(ad_data[features[1]], ad_data[features[0]], kind='kde')
 
-    # **Create a jointplot showing the kde distributions of Daily Time spent on site vs. Age.**
+    sns.jointplot(ad_data[features[0]], ad_data[features[3]])
 
-    sns.jointplot(ad_data['Age'], ad_data['Daily Time Spent on Site'], kind='kde')
-
-    # ** Create a jointplot of 'Daily Time Spent on Site' vs. 'Daily Internet Usage'**
-
-    sns.jointplot(ad_data['Daily Time Spent on Site'], ad_data['Daily Internet Usage'])
-
-    # ** Finally, create a pairplot with the hue defined by the 'Clicked on Ad' column feature.**
-
-    sns.pairplot(ad_data, hue='Clicked on Ad')
+    sns.pairplot(ad_data, hue=target)
 
     plt.show()
 
@@ -90,45 +91,34 @@ def logistic_reg_train(ad_data, target, features):
     :return: 
     '''
 
-    # # Logistic Regression
-    #
-    # Now it's time to do a train test split, and train our model!
-    #
-    # You'll have the freedom here to choose columns that you want to train on!
-
-    # ** Split the data into training set and testing set using train_test_split**
-    from sklearn.model_selection import train_test_split
+    # Categorize features and target
     X = ad_data[features]
     y = ad_data[target]
+
+    # Split into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
+    # Take a look at the head of your training set
     X_train.head()
 
-    # ** Train and fit a logistic regression model on the training set.**
-    from sklearn.linear_model import LogisticRegression
+    # Train and fit a logistic regression model on the training set.
     logm = LogisticRegression()
     logm.fit(X_train, y_train)
 
     return logm, X, y, X_test, y_test
 
 
-def predictions(logm, X_test, y_test):
+def predictions(logm, X_test):
     '''
-    Make predictions of test set using the linear model developed.
+    Make predictions of test set using the logistic model developed.
 
     :param logm: Linear regression instance
     :param X_test: Test set of features
-    :param y_test: Test set of target
     :return: 
     '''
 
-    # ## Predictions and Evaluations
-    # ** Now predict values for the testing data.**
-
-    # In[44]:
-
     predictions = logm.predict(X_test)
-    print(predictions)
+
     return predictions
 
 
@@ -141,7 +131,6 @@ def model_evaluation(y_test, predictions):
     :return: 
     '''
 
-    from sklearn.metrics import classification_report
     print(y_test)
     print(classification_report(y_test, predictions))
 
@@ -170,7 +159,7 @@ def main():
     logm, X, y, X_test, y_test = logistic_reg_train(ad_data, target, features)
 
     # Predict results of test data
-    prediction = predictions(logm, X_test, y_test)
+    prediction = predictions(logm, X_test)
 
     # Evaluate model
     model_evaluation(y_test, prediction)
